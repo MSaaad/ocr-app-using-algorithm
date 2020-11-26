@@ -1,0 +1,1 @@
+# ocr-app-using-algorithm
