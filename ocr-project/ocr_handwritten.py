@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.utils import shuffle
 
-DIGIT_WIDTH = 10
+DIGIT_WIDTH = 20
 DIGIT_HEIGHT = 20
 IMG_HEIGHT = 28
 IMG_WIDTH = 28
@@ -25,9 +25,6 @@ def pixels_to_hog_20(img_array):
         hog_featuresData.append(fd)
     hog_features = np.array(hog_featuresData, 'float64')
     return np.float32(hog_features)
-
-# define a custom model in a similar class wrapper with train and predict methods
-
 
 class KNN_MODEL():
     def __init__(self, k=3):
@@ -47,7 +44,7 @@ class SVM_MODEL():
     def __init__(self, num_feats, C=1, gamma=0.1):
         self.model = cv2.ml.SVM_create()
         self.model.setType(cv2.ml.SVM_C_SVC)
-        self.model.setKernel(cv2.ml.SVM_RBF)  # SVM_LINEAR, SVM_RBF
+        self.model.setKernel(cv2.ml.SVM_RBF)  
         self.model.setC(C)
         self.model.setGamma(gamma)
         self.features = num_feats
@@ -64,6 +61,7 @@ def get_digits(contours, hierarchy):
     hierarchy = hierarchy[0]
     bounding_rectangles = [cv2.boundingRect(ctr) for ctr in contours]
     final_bounding_rectangles = []
+
     # find the most common heirarchy level - that is where our digits's bounding boxes are
     u, indices = np.unique(hierarchy[:, -1], return_inverse=True)
     most_common_heirarchy = u[np.argmax(np.bincount(indices))]
@@ -72,7 +70,7 @@ def get_digits(contours, hierarchy):
         x, y, w, h = r
         # we are trying to extract ONLY the rectangles with images in it
         # we use heirarchy to extract only the boxes that are in the same global level - to avoid digits inside other digits
-        # ex: there could be a bounding box inside every 6,9,8 because of the loops in the number's appearence - we don't want that.
+        # there could be a bounding box inside every 6,9,8 because of the loops in the number's appearence - we don't want that.
         if ((w*h) > 250) and (10 <= w <= 200) and (10 <= h <= 200) and hr[3] == most_common_heirarchy:
             final_bounding_rectangles.append(r)
 
@@ -165,11 +163,9 @@ def load_digits_custom(img_file):
     return np.array(train_data), np.array(train_target)
 
 # data preparation
-
-
 TRAIN_MNIST_IMG = 'digits.png'
 TRAIN_USER_IMG = 'custom_train_digits.jpg'
-TEST_USER_IMG = 'numbers.jpg'
+TEST_USER_IMG = 'numbers.jpeg'
 
 # my handwritten dataset
 digits, labels = load_digits_custom(TRAIN_USER_IMG)
@@ -179,21 +175,31 @@ train_digits_data = pixels_to_hog_20(digits)
 X_train, X_test, y_train, y_test = train_test_split(
     train_digits_data, labels, test_size=0.33, random_state=42)
 
-#training and testing
+# training and testing
 a = int(input("Enter 1 for KNN and 2 for SVM: "))
 if a == 1:
     model = KNN_MODEL(k=3)
     model.train(X_train, y_train)
     preds = model.predict(X_test)
-    #print('Accuracy: ',accuracy_score(y_test, preds))
+
+    answer = accuracy_score(y_test, preds)
+    print('Accuracy with KNN: ', answer*100, '%')
+
     model = KNN_MODEL(k=4)
+
     model.train(train_digits_data, labels)
+
     proc_user_img(TEST_USER_IMG, model)
 elif a == 2:
     model = SVM_MODEL(num_feats=train_digits_data.shape[1])
     model.train(X_train, y_train)
     preds = model.predict(X_test)
+
+    answer = accuracy_score(y_test, preds)
+    print('Accuracy with SVM: ', answer*100, '%')
+
     model = SVM_MODEL(num_feats=train_digits_data.shape[1])
+
     model.train(train_digits_data, labels)
     proc_user_img(TEST_USER_IMG, model)
 
