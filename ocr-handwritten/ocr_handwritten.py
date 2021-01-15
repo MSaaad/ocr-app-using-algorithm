@@ -145,18 +145,18 @@ def load_digits_custom(img_file):
     plt.imshow(imgray)
     kernel = np.ones((5, 5), np.uint8)
 
-    ret, thresh = cv2.threshold(imgray, 127, 255, 0)
-    thresh = cv2.erode(thresh, kernel, iterations=1)
-    thresh = cv2.dilate(thresh, kernel, iterations=1)
-    thresh = cv2.erode(thresh, kernel, iterations=1)
-
     # blurred = cv2.GaussianBlur(im, (5, 5), 0)
     # cv2.imshow("blurred", blurred)
     # cv2.waitKey(0)
 
-    # edged = cv2.Canny(blurred, 30, 150)
+    # edged = cv2.Canny(im, 30, 150)
     # cv2.imshow("edged", edged)
     # cv2.waitKey(0)
+
+    ret, thresh = cv2.threshold(imgray, 127, 255, 0)
+    thresh = cv2.erode(thresh, kernel, iterations=1)
+    thresh = cv2.dilate(thresh, kernel, iterations=1)
+    thresh = cv2.erode(thresh, kernel, iterations=1)
 
     contours, hierarchy = cv2.findContours(
         thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
