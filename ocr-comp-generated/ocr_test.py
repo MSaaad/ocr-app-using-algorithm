@@ -6,7 +6,6 @@ import operator
 import os
 
 MIN_CONTOUR_AREA = 100
-
 RESIZED_IMAGE_WIDTH = 20
 RESIZED_IMAGE_HEIGHT = 30
 
@@ -65,7 +64,7 @@ def main():
     kNearest.train(npaFlattenedImages, cv2.ml.ROW_SAMPLE, npaClassifications)
 
     # read in testing numbers image
-    inputTestingImage = cv2.imread("images/2.png")
+    inputTestingImage = cv2.imread("images/7.png")
 
     if inputTestingImage is None:                           # if image was not read successfully
         print("error: image not read from file \n\n")
@@ -126,7 +125,7 @@ def main():
                       (contourWithData.intRectX + contourWithData.intRectWidth,
                        contourWithData.intRectY + contourWithData.intRectHeight),      # lower right corner
                       (155, 200, 50),  # border
-                      3)                        # thickness
+                      2)                        # thickness
 
         imgROI = imgThresh[contourWithData.intRectY: contourWithData.intRectY + contourWithData.intRectHeight,     # crop char out of threshold image
                            contourWithData.intRectX: contourWithData.intRectX + contourWithData.intRectWidth]
