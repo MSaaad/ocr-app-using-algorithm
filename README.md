@@ -8,4 +8,6 @@ Accuracy:
 with KNN => 81.11
 with SVM => 63.33
 
+handwritten model accuracy acceptable
+
 ### computer generated text recognition WIP
