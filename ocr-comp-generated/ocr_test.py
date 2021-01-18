@@ -165,6 +165,11 @@ def main():
 
     print("\n" + 'Recognized character output:', string_output + "\n")
 
+    # np.savetxt('Output.txt', np.c_[string_output])
+
+    with open('recognized_output.txt', 'a+') as text_file:
+        print('Recognized character output:', string_output, file=text_file)
+
     # show input image with border boxes drawn around found digits
     cv2.imshow("Input Test Image", inputTestingImage)
     cv2.waitKey(0)
