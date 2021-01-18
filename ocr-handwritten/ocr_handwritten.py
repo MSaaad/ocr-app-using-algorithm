@@ -6,6 +6,7 @@ from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.utils import shuffle
+import easygui
 
 DIGIT_WIDTH = 20
 DIGIT_HEIGHT = 20
@@ -77,6 +78,9 @@ def get_digits(contours, hierarchy):
 
     return final_bounding_rectangles
 
+#  image_picked = easygui.fileopenbox()
+#     inputTestingImage = cv2.imread(image_picked)
+
 
 def proc_user_img(img_file, model):
     print('Loading %s for optical digit recognition' % img_file)
@@ -146,7 +150,7 @@ def load_digits_custom(img_file):
     kernel = np.ones((5, 5), np.uint8)
 
     # blurred = cv2.GaussianBlur(im, (5, 5), 0)
-    # cv2.imshow("blurred", blurred)
+    # cv2.imshow("blurred", imgray)
     # cv2.waitKey(0)
 
     # edged = cv2.Canny(im, 30, 150)
@@ -187,8 +191,8 @@ def load_digits_custom(img_file):
 # data preparation
 TRAIN_MNIST_IMG = 'digits.png'
 TRAIN_USER_IMG = 'custom_digits.jpg'
-TEST_USER_IMG = 'numbers.jpeg'
-
+# TEST_USER_IMG = 'numbers.jpeg'
+TEST_USER_IMG = easygui.fileopenbox()
 # my handwritten dataset
 digits, labels = load_digits_custom(TRAIN_USER_IMG)
 
@@ -207,7 +211,7 @@ if a == 1:
     answer = accuracy_score(y_test, preds)
     print('Accuracy with KNN: ', answer*100, '%')
 
-    model = KNN_MODEL(k=4)
+    model = KNN_MODEL(k=5)
 
     model.train(train_digits_data, labels)
 

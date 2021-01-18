@@ -2,7 +2,8 @@ import cv2
 import numpy as np
 import operator
 import os
-import argparse
+# import argparse
+import easygui
 
 
 MIN_CONTOUR_AREA = 100
@@ -10,9 +11,10 @@ RESIZED_IMAGE_WIDTH = 20
 RESIZED_IMAGE_HEIGHT = 30
 
 
-ap = argparse.ArgumentParser()
-ap.add_argument('-i', '--image', required=True, help="path to testing image")
-args = vars(ap.parse_args())
+# for image upload through arguments
+# ap = argparse.ArgumentParser()
+# ap.add_argument('-i', '--image', required=False, help="path to testing image")
+# args = vars(ap.parse_args())
 
 
 class ContourWithData():
@@ -71,8 +73,11 @@ def main():
     # read in testing numbers image
     # inputTestingImage = cv2.imread("images/4.png")
 
-    inputTestingImage = cv2.imread(args['image'])
+    # inputTestingImage = cv2.imread(args['image'])
 
+    image_picked = easygui.fileopenbox()
+
+    inputTestingImage = cv2.imread(image_picked)
     if inputTestingImage is None:                           # if image was not read successfully
         print("error: image not read from file \n\n")
         os.system("pause")
