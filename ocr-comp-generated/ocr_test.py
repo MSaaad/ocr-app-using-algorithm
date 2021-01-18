@@ -1,13 +1,18 @@
-# TrainAndTest.py
-
 import cv2
 import numpy as np
 import operator
 import os
+import argparse
+
 
 MIN_CONTOUR_AREA = 100
 RESIZED_IMAGE_WIDTH = 20
 RESIZED_IMAGE_HEIGHT = 30
+
+
+ap = argparse.ArgumentParser()
+ap.add_argument('-i', '--image', required=True, help="path to testing image")
+args = vars(ap.parse_args())
 
 
 class ContourWithData():
@@ -64,7 +69,9 @@ def main():
     kNearest.train(npaFlattenedImages, cv2.ml.ROW_SAMPLE, npaClassifications)
 
     # read in testing numbers image
-    inputTestingImage = cv2.imread("images/4.png")
+    # inputTestingImage = cv2.imread("images/4.png")
+
+    inputTestingImage = cv2.imread(args['image'])
 
     if inputTestingImage is None:                           # if image was not read successfully
         print("error: image not read from file \n\n")
@@ -151,11 +158,10 @@ def main():
         string_output = string_output + strCurrentChar
         # string_output = string_output + ' ' + strCurrentChar
 
-    print("\n" + 'Recognized character output:', string_output +
-          "\n")
+    print("\n" + 'Recognized character output:', string_output + "\n")
 
     # show input image with border boxes drawn around found digits
-    cv2.imshow("inputTestingImage", inputTestingImage)
+    cv2.imshow("Input Test Image", inputTestingImage)
     cv2.waitKey(0)
 
     cv2.destroyAllWindows()

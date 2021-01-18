@@ -89,11 +89,12 @@ def extract_features(dataset):
 
 
 def dist(x, y):
-    return sum(
+      return sum(
         [
             (bytes_to_int(x_i) - bytes_to_int(y_i)) ** 2
             for x_i, y_i in zip(x, y)
-        ]) ** (0.5)
+        ]
+    ) ** (0.5)
 
 
 def get_training_distances_for_test_sample(X_train, test_sample):
