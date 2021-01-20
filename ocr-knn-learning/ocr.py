@@ -15,7 +15,7 @@ if DEBUG:
 
 
 # DATA_DIR = 'data/'
-# TEST_DIR = 'test/'
+TEST_DIR = 'test/'
 DATASET = 'fashion-mnist'  # `'mnist'` or `'fashion-mnist'`
 TEST_DATA_FILENAME = 't10k-images.idx3-ubyte'
 TEST_LABELS_FILENAME = 't10k-labels.idx1-ubyte'
@@ -146,8 +146,8 @@ def main():
         for idx, test_sample in enumerate(X_test):
             write_image(test_sample, f'{TEST_DIR}{idx}.png')
         # Load in the `our_test.png` we drew ourselves!
-        # X_test = [read_image(f'{DATA_DIR}our_test.png')]
-        # y_test = [5]
+        X_test = [read_image(f'{TEST_DIR}our_test.png')]
+        y_test = [5]
 
     X_train = extract_features(X_train)
     X_test = extract_features(X_test)

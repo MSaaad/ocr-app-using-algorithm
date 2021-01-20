@@ -110,7 +110,7 @@ def main():
     npaClassifications = fltClassifications.reshape(
         (fltClassifications.size, 1))
 
-    print("\n\ntraining complete !!\n")
+    print("\n\ntraining completed\n")
 
     # write scanned image metadata to files
     np.savetxt("data-files/classifications.txt", npaClassifications)
