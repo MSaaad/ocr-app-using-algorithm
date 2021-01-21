@@ -4,7 +4,7 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 import numpy as np
 
-mnist = tf.keras.datasets.mnist
+mnist = tf.keras.datasets.mnist  # 28x28 images of hadnwritten digits 0-9
 
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
 
@@ -12,10 +12,16 @@ x_train = tf.keras.utils.normalize(x_train, axis=1)
 x_test = tf.keras.utils.normalize(x_test, axis=1)
 
 model = tf.keras.models.Sequential()
+
+# to change to 2D images in dataset to a flattenend numbered image
 model.add(tf.keras.layers.Flatten())
 
+
+# 128 units or neurons => relu is default activation neural function
 model.add(tf.keras.layers.Dense(128, activation=tf.nn.relu))
 model.add(tf.keras.layers.Dense(128, activation=tf.nn.relu))
+
+# softmax for probability function
 model.add(tf.keras.layers.Dense(10, activation=tf.nn.softmax))
 
 # complex part of model making
@@ -35,9 +41,13 @@ new_model = tf.keras.models.load_model('mnist.model')
 
 predictions = new_model.predict([x_test])
 
-print(predictions)
+# probability predictions
+# print(predictions)
 
-print(np.argmax(predictions[0]))
+number = 3
+
+# change this asset
+print(np.argmax(predictions[number]))
 
 # plot showing
 # plt.imshow(x_train[0], cmap=plt.cm.binary)
@@ -45,5 +55,5 @@ print(np.argmax(predictions[0]))
 # print(x_train[0])
 
 # for checking the prediction
-plt.imshow(x_test[0])
+plt.imshow(x_test[number], cmap=plt.cm.binary)
 plt.show()
