@@ -15,7 +15,7 @@ IMG_WIDTH = 28
 CLASS_N = 10
 
 
-def pixels_to_hog_20(img_array):
+def pixel_to_combined_pixels(img_array):
     hog_featuresData = []
     for img in img_array:
         fd = hog(img,
@@ -42,24 +42,7 @@ class KNN_MODEL():
         return results.ravel()
 
 
-class SVM_MODEL():
-    def __init__(self, num_feats, C=1, gamma=0.1):
-        self.model = cv2.ml.SVM_create()
-        self.model.setType(cv2.ml.SVM_C_SVC)
-        self.model.setKernel(cv2.ml.SVM_RBF)
-        self.model.setC(C)
-        self.model.setGamma(gamma)
-        self.features = num_feats
-
-    def train(self, samples, responses):
-        self.model.train(samples, cv2.ml.ROW_SAMPLE, responses)
-
-    def predict(self, samples):
-        results = self.model.predict(samples.reshape(-1, self.features))
-        return results[1].ravel()
-
-
-def get_digits(contours, hierarchy):
+def extract_digits(contours, hierarchy):
     hierarchy = hierarchy[0]
     bounding_rectangles = [cv2.boundingRect(ctr) for ctr in contours]
     final_bounding_rectangles = []
@@ -78,11 +61,8 @@ def get_digits(contours, hierarchy):
 
     return final_bounding_rectangles
 
-#  image_picked = easygui.fileopenbox()
-#     inputTestingImage = cv2.imread(image_picked)
 
-
-def proc_user_img(img_file, model):
+def user_image_processing(img_file, model):
     print('Loading %s for optical digit recognition' % img_file)
     im = cv2.imread(img_file)
     blank_image = np.zeros((im.shape[0], im.shape[1], 3), np.uint8)
@@ -113,7 +93,7 @@ def proc_user_img(img_file, model):
         thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
     # rectangles of bounding the digits in user image
-    digits_rectangles = get_digits(contours, hierarchy)
+    digits_rectangles = extract_digits(contours, hierarchy)
 
     for rect in digits_rectangles:
         x, y, w, h = rect
@@ -122,7 +102,7 @@ def proc_user_img(img_file, model):
         im_digit = (255-im_digit)
         im_digit = imresize(im_digit, (IMG_WIDTH, IMG_HEIGHT))
 
-        hog_img_data = pixels_to_hog_20([im_digit])
+        hog_img_data = pixel_to_combined_pixels([im_digit])
         pred = model.predict(hog_img_data)
         cv2.putText(im, str(int(pred[0])), (x, y),
                     cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0), 3)
@@ -140,7 +120,7 @@ def get_contour_precedence(contour, cols):
 
 
 # this function processes a custom training image
-def load_digits_custom(img_file):
+def load_handwritten_image(img_file):
     train_data = []
     train_target = []
     start_class = 1
@@ -165,7 +145,7 @@ def load_digits_custom(img_file):
     contours, hierarchy = cv2.findContours(
         thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     # rectangles of bounding the digits in user image
-    digits_rectangles = get_digits(contours, hierarchy)
+    digits_rectangles = extract_digits(contours, hierarchy)
 
     # sort rectangles accoring to x,y pos so that we can label them
     digits_rectangles.sort(
@@ -194,37 +174,22 @@ TRAIN_USER_IMG = 'custom_digits.jpg'
 # TEST_USER_IMG = 'numbers.jpeg'
 TEST_USER_IMG = easygui.fileopenbox()
 # my handwritten dataset
-digits, labels = load_digits_custom(TRAIN_USER_IMG)
+digits, labels = load_handwritten_image(TRAIN_USER_IMG)
 
 digits, labels = shuffle(digits, labels, random_state=256)
-train_digits_data = pixels_to_hog_20(digits)
+train_digits_data = pixel_to_combined_pixels(digits)
 X_train, X_test, y_train, y_test = train_test_split(
     train_digits_data, labels, test_size=0.33, random_state=42)
 
-# training and testing
-a = int(input("Enter 1 for KNN and 2 for SVM: "))
-if a == 1:
-    model = KNN_MODEL(k=3)
-    model.train(X_train, y_train)
-    preds = model.predict(X_test)
 
-    answer = accuracy_score(y_test, preds)
-    print('Accuracy with KNN: ', answer*100, '%')
+model = KNN_MODEL(k=3)
+model.train(X_train, y_train)
+preds = model.predict(X_test)
 
-    model = KNN_MODEL(k=5)
+answer = accuracy_score(y_test, preds)
+print('\nAccuracy with KNN: ', answer*100, '%''\n')
 
-    model.train(train_digits_data, labels)
+model = KNN_MODEL(k=5)
+model.train(train_digits_data, labels)
 
-    proc_user_img(TEST_USER_IMG, model)
-elif a == 2:
-    model = SVM_MODEL(num_feats=train_digits_data.shape[1])
-    model.train(X_train, y_train)
-    preds = model.predict(X_test)
-
-    answer = accuracy_score(y_test, preds)
-    print('Accuracy with SVM: ', answer*100, '%')
-
-    model = SVM_MODEL(num_feats=train_digits_data.shape[1])
-
-    model.train(train_digits_data, labels)
-    proc_user_img(TEST_USER_IMG, model)
+user_image_processing(TEST_USER_IMG, model)
