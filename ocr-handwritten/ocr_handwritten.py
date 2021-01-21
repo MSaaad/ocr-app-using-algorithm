@@ -12,20 +12,6 @@ DIGIT_WIDTH = 20
 DIGIT_HEIGHT = 20
 IMG_HEIGHT = 28
 IMG_WIDTH = 28
-CLASS_N = 10
-
-
-def pixel_to_combined_pixels(img_array):
-    hog_featuresData = []
-    for img in img_array:
-        fd = hog(img,
-                 orientations=10,
-                 pixels_per_cell=(5, 5),
-                 cells_per_block=(1, 1),
-                 visualize=False)
-        hog_featuresData.append(fd)
-    hog_features = np.array(hog_featuresData, 'float64')
-    return np.float32(hog_features)
 
 
 class KNN_MODEL():
@@ -40,6 +26,19 @@ class KNN_MODEL():
         retval, results, neigh_resp, dists = self.model.findNearest(
             samples, self.k)
         return results.ravel()
+
+
+def pixel_to_combined_pixels(img_array):
+    hog_featuresData = []
+    for img in img_array:
+        fd = hog(img,
+                 orientations=10,
+                 pixels_per_cell=(5, 5),
+                 cells_per_block=(1, 1),
+                 visualize=False)
+        hog_featuresData.append(fd)
+    hog_features = np.array(hog_featuresData, 'float64')
+    return np.float32(hog_features)
 
 
 def extract_digits(contours, hierarchy):
@@ -70,19 +69,17 @@ def user_image_processing(img_file, model):
 
     imgray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
 
-    cv2.imshow("Greyscale Image", imgray)
+    resized_grayscale_image = cv2.resize(imgray, (500, 500))
+
+    cv2.imshow("Greyscale Image", resized_grayscale_image)
     cv2.waitKey(0)
 
     plt.imshow(imgray)
     kernel = np.ones((5, 5), np.uint8)
 
-    # blurred = cv2.GaussianBlur(im, (5, 5), 0)
-    # cv2.imshow("blurred", blurred)
-    # cv2.waitKey(0)
-
-    # edged = cv2.Canny(blurred, 30, 150)
-    # cv2.imshow("edged", edged)
-    # cv2.waitKey(0)
+    edged = cv2.Canny(resized_grayscale_image, 30, 150)
+    cv2.imshow("Canny Image", edged)
+    cv2.waitKey(0)
 
     ret, thresh = cv2.threshold(imgray, 127, 255, 0)
     thresh = cv2.erode(thresh, kernel, iterations=1)
@@ -97,21 +94,22 @@ def user_image_processing(img_file, model):
 
     for rect in digits_rectangles:
         x, y, w, h = rect
-        cv2.rectangle(im, (x, y), (x+w, y+h), (0, 255, 0), 2)
+        cv2.rectangle(im, (x, y), (x+w, y+h), (100, 0, 255), 6)
         im_digit = imgray[y:y+h, x:x+w]
         im_digit = (255-im_digit)
         im_digit = imresize(im_digit, (IMG_WIDTH, IMG_HEIGHT))
 
         hog_img_data = pixel_to_combined_pixels([im_digit])
         pred = model.predict(hog_img_data)
+        # box overlay
         cv2.putText(im, str(int(pred[0])), (x, y),
-                    cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0), 3)
+                    cv2.FONT_HERSHEY_SIMPLEX, 2, (100, 100, 15), 6)
+       # final digits
         cv2.putText(blank_image, str(
-            int(pred[0])), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 0, 0), 5)
+            int(pred[0])), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 3, (55, 10, 200), 6)
 
-    # plt.imshow(im)
-    cv2.imwrite("output-images/original_overlay.png", im)
-    cv2.imwrite("output-images/final_digits.png", blank_image)
+    cv2.imwrite("output-images/originalOverlay.png", im)
+    cv2.imwrite("output-images/finalDigits.png", blank_image)
     cv2.destroyAllWindows()
 
 
@@ -129,14 +127,6 @@ def load_handwritten_image(img_file):
     plt.imshow(imgray)
     kernel = np.ones((5, 5), np.uint8)
 
-    # blurred = cv2.GaussianBlur(im, (5, 5), 0)
-    # cv2.imshow("blurred", imgray)
-    # cv2.waitKey(0)
-
-    # edged = cv2.Canny(im, 30, 150)
-    # cv2.imshow("edged", edged)
-    # cv2.waitKey(0)
-
     ret, thresh = cv2.threshold(imgray, 127, 255, 0)
     thresh = cv2.erode(thresh, kernel, iterations=1)
     thresh = cv2.dilate(thresh, kernel, iterations=1)
@@ -153,7 +143,7 @@ def load_handwritten_image(img_file):
 
     for index, rect in enumerate(digits_rectangles):
         x, y, w, h = rect
-        cv2.rectangle(im, (x, y), (x+w, y+h), (0, 255, 0), 2)
+        cv2.rectangle(im, (x, y), (x+w, y+h), (50, 100, 0), 3)
         im_digit = imgray[y:y+h, x:x+w]
         im_digit = (255-im_digit)
 
@@ -163,7 +153,7 @@ def load_handwritten_image(img_file):
 
         if index > 0 and (index+1) % 10 == 0:
             start_class += 1
-    cv2.imwrite("output-images/training_box_overlay.png", im)
+    cv2.imwrite("output-images/trainingBoxOverlay.png", im)
 
     return np.array(train_data), np.array(train_target)
 
