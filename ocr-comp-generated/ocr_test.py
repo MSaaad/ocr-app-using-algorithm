@@ -11,14 +11,8 @@ RESIZED_IMAGE_WIDTH = 20
 RESIZED_IMAGE_HEIGHT = 30
 
 
-# for image upload through arguments
-# ap = argparse.ArgumentParser()
-# ap.add_argument('-i', '--image', required=False, help="path to testing image")
-# args = vars(ap.parse_args())
-
-
 class ContourWithData():
-    npaContour = None           # contour
+    Contour = None           # contour
     boundingRect = None         # bounding rect for contour
     intRectX = 0                # bounding rect top left corner x location
     intRectY = 0                # bounding rect top left corner y location
@@ -46,7 +40,7 @@ def main():
 
     try:
         # read in training classifications
-        npaClassifications = np.loadtxt(
+        Classifications = np.loadtxt(
             "data-files/classifications.txt", np.float32)
     except:
         print("error, unable to open classifications.txt, exiting program\n")
@@ -55,7 +49,7 @@ def main():
 
     try:
         # read in training images
-        npaFlattenedImages = np.loadtxt(
+        FlattenedImages = np.loadtxt(
             "data-files/flattened_images.txt", np.float32)
     except:
         print("error, unable to open flattened_images.txt, exiting program\n")
@@ -63,18 +57,10 @@ def main():
         return
 
     # reshape numpy array to 1d, necessary to pass to call to train
-    npaClassifications = npaClassifications.reshape(
-        (npaClassifications.size, 1))
-
+    Classifications = Classifications.reshape(
+        (Classifications.size, 1))
     kNearest = cv2.ml.KNearest_create()                   # instantiate KNN object
-
-    kNearest.train(npaFlattenedImages, cv2.ml.ROW_SAMPLE, npaClassifications)
-
-    # read in testing numbers image
-    # inputTestingImage = cv2.imread("images/4.png")
-
-    # inputTestingImage = cv2.imread(args['image'])
-
+    kNearest.train(FlattenedImages, cv2.ml.ROW_SAMPLE, Classifications)
     image_picked = easygui.fileopenbox()
 
     inputTestingImage = cv2.imread(image_picked)
@@ -98,21 +84,21 @@ def main():
         imgBlurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
     imgThreshCopy = imgThresh.copy()
 
-    npaContours, npaHierarchy = cv2.findContours(imgThreshCopy,             # input image, make sure to use a copy since the function will modify this image in the course of finding contours
-                                                 cv2.RETR_EXTERNAL,         # retrieve the outermost contours only
-                                                 cv2.CHAIN_APPROX_SIMPLE)   # compress horizontal, vertical, and diagonal segments and leave only their end points
+    Contours, Hierarchy = cv2.findContours(imgThreshCopy,             # input image, make sure to use a copy since the function will modify this image in the course of finding contours
+                                           cv2.RETR_EXTERNAL,         # retrieve the outermost contours only
+                                           cv2.CHAIN_APPROX_SIMPLE)   # compress horizontal, vertical, and diagonal segments and leave only their end points
 
-    for npaContour in npaContours:
+    for Contour in Contours:
         # instantiate a contour with data object
         contourWithData = ContourWithData()
         # assign contour to contour with data
-        contourWithData.npaContour = npaContour
+        contourWithData.Contour = Contour
         contourWithData.boundingRect = cv2.boundingRect(
-            contourWithData.npaContour)     # get the bounding rect
+            contourWithData.Contour)     # get the bounding rect
         contourWithData.calculateRectTopLeftPointAndWidthAndHeight(
         )                    # get bounding rect info
         contourWithData.fltArea = cv2.contourArea(
-            contourWithData.npaContour)           # calculate the contour area
+            contourWithData.Contour)           # calculate the contour area
         # add contour with data object to list of all contours with data
         allContoursWithData.append(contourWithData)
 
@@ -147,17 +133,17 @@ def main():
             imgROI, (RESIZED_IMAGE_WIDTH, RESIZED_IMAGE_HEIGHT))
 
         # flatten image into 1d numpy array
-        npaROIResized = imgROIResized.reshape(
+        ROIResized = imgROIResized.reshape(
             (1, RESIZED_IMAGE_WIDTH * RESIZED_IMAGE_HEIGHT))
 
         # convert from 1d numpy array of ints to 1d numpy array of floats
-        npaROIResized = np.float32(npaROIResized)
+        ROIResized = np.float32(ROIResized)
 
-        retval, npaResults, neigh_resp, dists = kNearest.findNearest(
-            npaROIResized, k=1)     # call KNN function find_nearest
+        retval, Results, neigh_resp, dists = kNearest.findNearest(
+            ROIResized, k=1)     # call KNN function find_nearest
 
         # get character from results
-        strCurrentChar = str(chr(int(npaResults[0][0])))
+        strCurrentChar = str(chr(int(Results[0][0])))
 
         # append current char to full string
         string_output = string_output + strCurrentChar
