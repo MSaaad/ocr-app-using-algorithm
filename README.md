@@ -1,6 +1,5 @@
 # ocr-app-using-algorithm
 
-## starting date 11-1-21
 
 ## Algoritm used: KNN
 ## Using neural network, model training and algorithm
